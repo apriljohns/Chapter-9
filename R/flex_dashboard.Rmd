@@ -1,0 +1,75 @@
+---
+title: "Ch 9 Flex Dashboard"
+author: "April Johns"
+date: "2025-11-10"
+output: flexdashboard::flex_dashboard
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+
+ufo_raw <- read_csv('../data/ufo_sightings.csv')
+
+ufo_clean <- ufo_raw %>% 
+  mutate(date_time = mdy_hm(date_time),
+         sighting_year = year(date_time))
+
+
+```
+
+Column {data-width=600}
+-------------------------------------
+    
+### Chart 1
+    
+```{r}
+library(leaflet)
+
+pal <- colorQuantile("YlOrRd", NULL, n = 8)
+
+ufo_clean %>% 
+  rename(bob = latitude,
+         sue = longitude) %>% 
+  filter(state == 'co') %>% 
+  leaflet() %>% 
+  addTiles() %>%
+  addCircleMarkers(color = ~pal(encounter_length),
+                   lat = ~bob,
+                   lng = ~sue) %>% 
+  fitBounds(20, 50, -100, -130) %>% 
+  setView(-120, 30, zoom = 3)
+```
+   
+Column {data-width=400}
+-------------------------------------
+   
+### Chart 2
+
+```{r}
+library(DT)
+
+ufo_clean %>% 
+  filter(state == 'co') %>% 
+  group_by(sighting_year) %>% 
+  summarise(sightings_sum = n()) %>% 
+  ggplot() + 
+  geom_line(aes(x = sighting_year, y = sightings_sum))
+```   
+ 
+### Chart 3
+    
+```{r}
+ufo_clean %>% 
+  filter(state == 'co') %>% 
+  select(city_area, sighting_year) %>% 
+  rename(Location = city_area,
+         Year = sighting_year) %>% 
+  datatable(options = list(pageLength = 5))
+```
+
+
+
