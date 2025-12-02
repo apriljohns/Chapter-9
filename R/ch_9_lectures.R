@@ -9,6 +9,3 @@ ufo_co <- ufo_raw %>%
 
 # this is a test
 
-# local - commit 1
-
-# local - commit 2
